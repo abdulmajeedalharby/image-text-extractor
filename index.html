@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Text Extractor - OCR Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white dark:bg-gray-900 min-h-screen transition-colors">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4">
+                📖 Image Text Extractor
+            </h1>
+            <p class="text-gray-600 dark:text-gray-300 text-lg">
+                Upload any image with text and extract it instantly using AI-powered OCR
+            </p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 p-8 text-center mb-6">
+            <div id="uploadArea" class="cursor-pointer">
+                <div id="uploadPrompt">
+                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <p class="text-gray-600 dark:text-gray-300 text-lg font-medium mb-2">
+                        Click to upload an image or drag and drop
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">
+                        Supports PNG, JPG, JPEG, WebP files
+                    </p>
+                </div>
+                <div id="imagePreview" class="hidden">
+                    <img id="previewImg" class="max-w-full max-h-64 mx-auto rounded-lg shadow-lg mb-4" alt="Preview">
+                    <p class="text-gray-600 dark:text-gray-300 font-medium" id="fileName"></p>
+                </div>
+            </div>
+            <input type="file" id="imageInput" accept="image/*" class="hidden">
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+            <button id="extractBtn" class="flex-1 bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base" disabled>
+                <span id="extractBtnText">Extract Text from Image</span>
+                <span id="extractBtnLoader" class="hidden">
+                    <svg class="inline w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Extracting text...
+                </span>
+            </button>
+            <button id="clearBtn" class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-base">
+                Clear All
+            </button>
+        </div>
+
+        <!-- Text Display Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Extracted Text
+                </h3>
+            </div>
+            <div class="p-6">
+                <textarea id="extractedText" class="w-full bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-48 text-gray-800 dark:text-gray-200 font-mono text-base leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Extracted text will appear here... Upload an image to get started!" readonly></textarea>
+                <div id="actionButtons" class="flex flex-col sm:flex-row gap-3 mt-4 opacity-50 pointer-events-none transition-opacity">
+                    <button id="copyBtn" class="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-base">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        Copy Text
+                    </button>
+                    <button id="downloadBtn" class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-base">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Download as TXT
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg mt-4">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                </svg>
+                <span id="errorText"></span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 text-gray-500 dark:text-gray-400 text-sm">
+            <p>Powered by AI • Extract text from images, documents, screenshots, and more</p>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode support
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        let selectedFile = null;
+        let extractedTextContent = '';
+
+        // DOM elements
+        const imageInput = document.getElementById('imageInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadPrompt = document.getElementById('uploadPrompt');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const fileName = document.getElementById('fileName');
+        const extractBtn = document.getElementById('extractBtn');
+        const extractBtnText = document.getElementById('extractBtnText');
+        const extractBtnLoader = document.getElementById('extractBtnLoader');
+        const clearBtn = document.getElementById('clearBtn');
+        const extractedText = document.getElementById('extractedText');
+        const actionButtons = document.getElementById('actionButtons');
+        const copyBtn = document.getElementById('copyBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+
+        // File upload handling
+        uploadArea.addEventListener('click', () => imageInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('bg-gray-100', 'dark:bg-gray-700');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelection(files[0]);
+            }
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelection(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file.');
+                return;
+            }
+
+            selectedFile = file;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                fileName.textContent = file.name;
+                uploadPrompt.classList.add('hidden');
+                imagePreview.classList.remove('hidden');
+                extractBtn.disabled = false;
+                hideError();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Register handler for OCR responses
+        window.Poe.registerHandler("ocr-handler", (result) => {
+            const msg = result.responses[0];
+            
+            if (msg.status === "error") {
+                showError("Error extracting text: " + (msg.statusText || "Unknown error"));
+                setExtractButtonState(false);
+            } else if (msg.status === "complete") {
+                extractedTextContent = msg.content.trim();
+                extractedText.value = extractedTextContent || "No text was found in the image.";
+                enableActionButtons();
+                setExtractButtonState(false);
+                hideError();
+            }
+        });
+
+        // Extract text function
+        extractBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            setExtractButtonState(true);
+            hideError();
+            disableActionButtons();
+
+            try {
+                await window.Poe.sendUserMessage(
+                    "@Claude-Sonnet-4 Please extract all text from this image. Provide ONLY the extracted text content with no explanations, additional commentary, or formatting. If no text is found, respond with 'No text found'.",
+                    {
+                        attachments: [selectedFile],
+                        handler: "ocr-handler",
+                        stream: false,
+                        openChat: false
+                    }
+                );
+            } catch (err) {
+                showError("Failed to process image: " + err.message);
+                setExtractButtonState(false);
+            }
+        });
+
+        // Copy text function
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(extractedTextContent);
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = `
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Copied!
+                `;
+                copyBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                copyBtn.classList.add('bg-green-700');
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                    copyBtn.classList.remove('bg-green-700');
+                }, 2000);
+            } catch (err) {
+                showError('Failed to copy text to clipboard');
+            }
+        });
+
+        // Download text function
+        downloadBtn.addEventListener('click', () => {
+            const blob = new Blob([extractedTextContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted-text.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // Clear all function
+        clearBtn.addEventListener('click', () => {
+            selectedFile = null;
+            imageInput.value = '';
+            uploadPrompt.classList.remove('hidden');
+            imagePreview.classList.add('hidden');
+            extractBtn.disabled = true;
+            extractedTextContent = '';
+            extractedText.value = '';
+            disableActionButtons();
+            hideError();
+        });
+
+        function setExtractButtonState(isLoading) {
+            extractBtn.disabled = isLoading;
+            if (isLoading) {
+                extractBtnText.classList.add('hidden');
+                extractBtnLoader.classList.remove('hidden');
+            } else {
+                extractBtnText.classList.remove('hidden');
+                extractBtnLoader.classList.add('hidden');
+            }
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorMessage.classList.add('hidden');
+        }
+
+        function enableActionButtons() {
+            actionButtons.classList.remove('opacity-50', 'pointer-events-none');
+        }
+
+        function disableActionButtons() {
+            actionButtons.classList.add('opacity-50', 'pointer-events-none');
+        }
+    </script>
+</body>
+</html>
