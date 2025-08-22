@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Text Extractor - OCR Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -25,8 +26,13 @@
                 📖 Image Text Extractor
             </h1>
             <p class="text-gray-600 dark:text-gray-300 text-lg">
-                Upload any image with text and extract it instantly using AI-powered OCR
+                Upload any image with text and extract it instantly using OCR technology
             </p>
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4 inline-block">
+                <p class="text-blue-800 dark:text-blue-200 text-sm">
+                    🌐 Now hosted on GitHub Pages with client-side OCR!
+                </p>
+            </div>
         </div>
 
         <!-- Upload Section -->
@@ -66,6 +72,14 @@
             <button id="clearBtn" class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-base">
                 Clear All
             </button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progressContainer" class="hidden mb-6">
+            <div class="bg-gray-200 dark:bg-gray-700 rounded-lg h-3 overflow-hidden">
+                <div id="progressBar" class="bg-primary h-full transition-all duration-300 ease-out" style="width: 0%"></div>
+            </div>
+            <p id="progressText" class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">Initializing OCR...</p>
         </div>
 
         <!-- Text Display Section -->
@@ -109,7 +123,8 @@
 
         <!-- Footer -->
         <div class="text-center mt-12 text-gray-500 dark:text-gray-400 text-sm">
-            <p>Powered by AI • Extract text from images, documents, screenshots, and more</p>
+            <p>Powered by Tesseract.js • Extract text from images, documents, screenshots, and more</p>
+            <p class="mt-2">🚀 Hosted on GitHub Pages • Open source OCR technology</p>
         </div>
     </div>
 
@@ -146,6 +161,9 @@
         const downloadBtn = document.getElementById('downloadBtn');
         const errorMessage = document.getElementById('errorMessage');
         const errorText = document.getElementById('errorText');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
 
         // File upload handling
         uploadArea.addEventListener('click', () => imageInput.click());
@@ -195,45 +213,54 @@
             reader.readAsDataURL(file);
         }
 
-        // Register handler for OCR responses
-        window.Poe.registerHandler("ocr-handler", (result) => {
-            const msg = result.responses[0];
-            
-            if (msg.status === "error") {
-                showError("Error extracting text: " + (msg.statusText || "Unknown error"));
-                setExtractButtonState(false);
-            } else if (msg.status === "complete") {
-                extractedTextContent = msg.content.trim();
-                extractedText.value = extractedTextContent || "No text was found in the image.";
-                enableActionButtons();
-                setExtractButtonState(false);
-                hideError();
-            }
-        });
-
-        // Extract text function
+        // Extract text using Tesseract.js
         extractBtn.addEventListener('click', async () => {
             if (!selectedFile) return;
 
             setExtractButtonState(true);
             hideError();
             disableActionButtons();
+            showProgress();
 
             try {
-                await window.Poe.sendUserMessage(
-                    "@Claude-Sonnet-4 Please extract all text from this image. Provide ONLY the extracted text content with no explanations, additional commentary, or formatting. If no text is found, respond with 'No text found'.",
-                    {
-                        attachments: [selectedFile],
-                        handler: "ocr-handler",
-                        stream: false,
-                        openChat: false
+                const result = await Tesseract.recognize(selectedFile, 'eng', {
+                    logger: m => {
+                        updateProgress(m);
                     }
-                );
+                });
+
+                extractedTextContent = result.data.text.trim();
+                extractedText.value = extractedTextContent || "No text was found in the image.";
+                enableActionButtons();
+                hideProgress();
+                setExtractButtonState(false);
+                hideError();
             } catch (err) {
                 showError("Failed to process image: " + err.message);
                 setExtractButtonState(false);
+                hideProgress();
             }
         });
+
+        function updateProgress(m) {
+            if (m.status === 'recognizing text') {
+                const progress = Math.round(m.progress * 100);
+                progressBar.style.width = progress + '%';
+                progressText.textContent = `Recognizing text... ${progress}%`;
+            } else {
+                progressText.textContent = m.status || 'Processing...';
+            }
+        }
+
+        function showProgress() {
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Initializing OCR...';
+        }
+
+        function hideProgress() {
+            progressContainer.classList.add('hidden');
+        }
 
         // Copy text function
         copyBtn.addEventListener('click', async () => {
@@ -281,6 +308,7 @@
             extractedTextContent = '';
             extractedText.value = '';
             disableActionButtons();
+            hideProgress();
             hideError();
         });
 
