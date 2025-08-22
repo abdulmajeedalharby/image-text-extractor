@@ -1,344 +1,397 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Text Extractor - OCR Tool</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#5D5CDE'
-                    }
-                }
-            }
-        }
-    </script>
+  <meta charset="UTF-8">
+  <title>Image Text Extractor | مستخرج النص من الصورة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', 'Cairo', Arial, sans-serif;
+      background: linear-gradient(120deg, #3a1c71 0%, #d76d77 50%, #ffaf7b 100%);
+      box-sizing: border-box;
+      color: #fff;
+      overflow-x: hidden;
+      transition: background 0.6s;
+    }
+    header {
+      width: 100%;
+      background: rgba(34, 8, 64, 0.77);
+      padding: 0 0 12px 0;
+      text-align: center;
+      box-shadow: 0 2px 14px #1b06407e;
+      margin-bottom: 18px;
+    }
+    .title {
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin: 0;
+      padding-top: 26px;
+      background: linear-gradient(90deg, #ffe53b, #fa8bff 80%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-fill-color: transparent;
+      letter-spacing: 1.5px;
+    }
+    .subtitle {
+      font-size: 1.25rem;
+      margin: 7px 0 0 0;
+      color: #ffe1ea;
+      letter-spacing: 0.5px;
+      font-weight: 400;
+    }
+    .lang-switch {
+      direction: ltr;
+      margin: 18px 0 0 0;
+      text-align: center;
+    }
+    .lang-btn {
+      background: #fff;
+      color: #410077;
+      border: none;
+      border-radius: 7px;
+      padding: 6px 16px;
+      margin: 0 7px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #41007723;
+      transition: background .17s, color .17s;
+    }
+    .lang-btn.active, .lang-btn:focus {
+      background: #8f37ff;
+      color: #fff;
+    }
+    main {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 48px;
+      min-height: 65vh;
+      padding: 0 5vw 0 5vw;
+      margin-top: 22px;
+      flex-wrap: wrap;
+    }
+    .left-panel {
+      flex: 0 1 380px;
+      background: rgba(34, 8, 64, 0.82);
+      border-radius: 28px;
+      box-shadow: 0 8px 48px #1b064066;
+      padding: 32px 32px 24px 32px;
+      min-width: 300px;
+      max-width: 430px;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    .right-panel {
+      flex: 1 1 380px;
+      background: rgba(255,255,255,0.13);
+      border-radius: 28px;
+      box-shadow: 0 8px 48px #1b064033;
+      padding: 32px 32px 24px 32px;
+      min-width: 300px;
+      max-width: 600px;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    label {
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+      font-weight: 500;
+      color: #ffe1ea;
+      display: block;
+      text-shadow: 0 1px 4px #15122b;
+      letter-spacing: 0.3px;
+    }
+    input[type="file"] {
+      margin-bottom: 18px;
+      padding: 10px 0;
+      color: #fff;
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      direction: ltr;
+    }
+    #preview {
+      max-width: 98%;
+      max-height: 270px;
+      margin: 20px auto 10px auto;
+      box-shadow: 0 2px 16px #ffe53b36;
+      border-radius: 14px;
+      display: none;
+      border: 2px solid #7f5fff;
+      background: #fff;
+    }
+    .extract-btn {
+      background: linear-gradient(90deg, #8f37ff 0%, #fa8bff 100%);
+      border: none;
+      color: #fff;
+      padding: 12px 44px;
+      border-radius: 16px;
+      font-size: 1.12rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      margin-bottom: 24px;
+      transition: background 0.2s, transform 0.17s;
+      box-shadow: 0 1px 8px #7f5fff33;
+    }
+    .extract-btn:disabled {
+      background: #2d1c41 !important;
+      color: #ba8bfc !important;
+      cursor: not-allowed;
+    }
+    .section-title {
+      color: #ffb56b;
+      margin-bottom: 10px;
+      font-size: 1.13rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-top: 7px;
+    }
+    #output {
+      background: linear-gradient(90deg, #2e1439 0%, #341e46 100%);
+      color: #fff;
+      min-height: 82px;
+      padding: 16px 14px;
+      border-radius: 15px;
+      word-break: break-word;
+      white-space: pre-wrap;
+      font-size: 1.07rem;
+      box-shadow: 0 2px 10px #7f5fff13;
+      margin-bottom: 0;
+      outline: 1.5px solid #7f5fff44;
+      width: 100%;
+      max-width: 98%;
+    }
+    .loading {
+      color: #ffe53b;
+      font-weight: 700;
+      font-style: italic;
+      letter-spacing: 1px;
+    }
+    .tips {
+      margin-top: 20px;
+      color: #ffe1ea;
+      font-size: 0.98rem;
+      background: rgba(255, 255, 255, 0.09);
+      padding: 12px 14px;
+      border-radius: 12px;
+    }
+    .footer {
+      margin-top: 0;
+      color: #f8e8ff;
+      font-size: 1.05rem;
+      text-align: center;
+      letter-spacing: 0.2px;
+      background: rgba(34, 8, 64, 0.75);
+      padding: 24px 0 18px 0;
+      width: 100vw;
+    }
+    @media (max-width: 1100px) {
+      main {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 0 2vw 0 2vw;
+      }
+      .left-panel, .right-panel {
+        margin: 0 auto 32px auto;
+      }
+    }
+    @media (max-width: 700px) {
+      .left-panel, .right-panel {
+        min-width: 90vw;
+        max-width: 98vw;
+        padding: 18px 6vw 18px 6vw;
+      }
+    }
+  </style>
 </head>
-<body class="bg-white dark:bg-gray-900 min-h-screen transition-colors">
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4">
-                📖 Image Text Extractor
-            </h1>
-            <p class="text-gray-600 dark:text-gray-300 text-lg">
-                Upload any image with text and extract it instantly using OCR technology
-            </p>
-            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4 inline-block">
-                <p class="text-blue-800 dark:text-blue-200 text-sm">
-                    🌐 Now hosted on GitHub Pages with client-side OCR!
-                </p>
-            </div>
-        </div>
-
-        <!-- Upload Section -->
-        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 p-8 text-center mb-6">
-            <div id="uploadArea" class="cursor-pointer">
-                <div id="uploadPrompt">
-                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                    </svg>
-                    <p class="text-gray-600 dark:text-gray-300 text-lg font-medium mb-2">
-                        Click to upload an image or drag and drop
-                    </p>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
-                        Supports PNG, JPG, JPEG, WebP files
-                    </p>
-                </div>
-                <div id="imagePreview" class="hidden">
-                    <img id="previewImg" class="max-w-full max-h-64 mx-auto rounded-lg shadow-lg mb-4" alt="Preview">
-                    <p class="text-gray-600 dark:text-gray-300 font-medium" id="fileName"></p>
-                </div>
-            </div>
-            <input type="file" id="imageInput" accept="image/*" class="hidden">
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 mb-6">
-            <button id="extractBtn" class="flex-1 bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base" disabled>
-                <span id="extractBtnText">Extract Text from Image</span>
-                <span id="extractBtnLoader" class="hidden">
-                    <svg class="inline w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Extracting text...
-                </span>
-            </button>
-            <button id="clearBtn" class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-base">
-                Clear All
-            </button>
-        </div>
-
-        <!-- Progress Bar -->
-        <div id="progressContainer" class="hidden mb-6">
-            <div class="bg-gray-200 dark:bg-gray-700 rounded-lg h-3 overflow-hidden">
-                <div id="progressBar" class="bg-primary h-full transition-all duration-300 ease-out" style="width: 0%"></div>
-            </div>
-            <p id="progressText" class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">Initializing OCR...</p>
-        </div>
-
-        <!-- Text Display Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Extracted Text
-                </h3>
-            </div>
-            <div class="p-6">
-                <textarea id="extractedText" class="w-full bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-600 min-h-48 text-gray-800 dark:text-gray-200 font-mono text-base leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Extracted text will appear here... Upload an image to get started!" readonly></textarea>
-                <div id="actionButtons" class="flex flex-col sm:flex-row gap-3 mt-4 opacity-50 pointer-events-none transition-opacity">
-                    <button id="copyBtn" class="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-base">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                        </svg>
-                        Copy Text
-                    </button>
-                    <button id="downloadBtn" class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-base">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Download as TXT
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Error Message -->
-        <div id="errorMessage" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg mt-4">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                </svg>
-                <span id="errorText"></span>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="text-center mt-12 text-gray-500 dark:text-gray-400 text-sm">
-            <p>Powered by Tesseract.js • Extract text from images, documents, screenshots, and more</p>
-            <p class="mt-2">🚀 Hosted on GitHub Pages • Open source OCR technology</p>
-        </div>
+<body>
+  <header>
+    <div class="title" id="main-title">✨ Image Text Extractor</div>
+    <div class="subtitle" id="main-subtitle">Extract text from your images easily | استخرج النص من صورك بسهولة</div>
+    <div class="lang-switch">
+      <button class="lang-btn active" id="en-btn">English</button>
+      <button class="lang-btn" id="ar-btn">العربية</button>
     </div>
+  </header>
+  <main>
+    <section class="left-panel" id="input-panel">
+      <label for="imageInput" id="file-label">Select an image file:</label>
+      <input type="file" id="imageInput" accept="image/*">
+      <img id="preview" alt="Image preview">
+      <button class="extract-btn" id="extractBtn" disabled>Extract Text</button>
+      <div class="tips" id="tips">
+        Supported formats: JPG, PNG, BMP, GIF<br>
+        For best results, use clear images with readable text.<br>
+        النصوص الصغيرة أو غير الواضحة قد تعطي نتائج أقل دقة.
+      </div>
+    </section>
+    <section class="right-panel">
+      <div class="section-title" id="output-title">Extracted Text</div>
+      <div id="output"></div>
+    </section>
+  </main>
+  <div class="footer">
+    <span id="footer-text">Made with 💜 | Image Text Extractor | مستخرج النص من الصورة</span>
+  </div>
+  <!-- Tesseract.js with Arabic script support -->
+  <script src="https://unpkg.com/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
+  <script>
+    // Language handling
+    const en = {
+      mainTitle: "✨ Image Text Extractor",
+      mainSubtitle: "Extract text from your images easily | استخرج النص من صورك بسهولة",
+      fileLabel: "Select an image file:",
+      extractBtn: "Extract Text",
+      outputTitle: "Extracted Text",
+      tips: "Supported formats: JPG, PNG, BMP, GIF<br>For best results, use clear images with readable text.<br>النصوص الصغيرة أو غير الواضحة قد تعطي نتائج أقل دقة.",
+      loading: "Extracting text, please wait...",
+      noText: "[No text detected]",
+      error: "[Error extracting text]",
+      footer: "Made with 💜 | Image Text Extractor | مستخرج النص من الصورة"
+    };
+    const ar = {
+      mainTitle: "✨ مستخرج النص من الصورة",
+      mainSubtitle: "استخرج النص من صورك بسهولة | Extract text from your images easily",
+      fileLabel: "اختر صورة من جهازك:",
+      extractBtn: "استخرج النص",
+      outputTitle: "النص المستخرج",
+      tips: "الصيغ المدعومة: JPG, PNG, BMP, GIF<br>لأفضل نتيجة استخدم صورًا واضحة ذات نص مقروء.<br>النصوص الصغيرة أو غير الواضحة قد تعطي نتائج أقل دقة.",
+      loading: "جاري استخراج النص، يرجى الانتظار...",
+      noText: "[لم يتم العثور على نص]",
+      error: "[حدث خطأ أثناء استخراج النص]",
+      footer: "صُنع بحب 💜 | مستخرج النص من الصورة | Image Text Extractor"
+    };
+    let lang = 'en';
 
-    <script>
-        // Dark mode support
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        }
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        });
+    const elements = {
+      mainTitle: document.getElementById('main-title'),
+      mainSubtitle: document.getElementById('main-subtitle'),
+      fileLabel: document.getElementById('file-label'),
+      extractBtn: document.getElementById('extractBtn'),
+      outputTitle: document.getElementById('output-title'),
+      tips: document.getElementById('tips'),
+      footer: document.getElementById('footer-text'),
+      enBtn: document.getElementById('en-btn'),
+      arBtn: document.getElementById('ar-btn'),
+      output: document.getElementById('output'),
+      inputPanel: document.getElementById('input-panel'),
+      imageInput: document.getElementById('imageInput'),
+      preview: document.getElementById('preview')
+    };
 
-        let selectedFile = null;
-        let extractedTextContent = '';
+    function setLanguage(newLang) {
+      lang = newLang;
+      const dict = lang === 'ar' ? ar : en;
+      elements.mainTitle.textContent = dict.mainTitle;
+      elements.mainSubtitle.textContent = dict.mainSubtitle;
+      elements.fileLabel.textContent = dict.fileLabel;
+      elements.extractBtn.textContent = dict.extractBtn;
+      elements.outputTitle.textContent = dict.outputTitle;
+      elements.tips.innerHTML = dict.tips;
+      elements.footer.textContent = dict.footer;
 
-        // DOM elements
-        const imageInput = document.getElementById('imageInput');
-        const uploadArea = document.getElementById('uploadArea');
-        const uploadPrompt = document.getElementById('uploadPrompt');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewImg = document.getElementById('previewImg');
-        const fileName = document.getElementById('fileName');
-        const extractBtn = document.getElementById('extractBtn');
-        const extractBtnText = document.getElementById('extractBtnText');
-        const extractBtnLoader = document.getElementById('extractBtnLoader');
-        const clearBtn = document.getElementById('clearBtn');
-        const extractedText = document.getElementById('extractedText');
-        const actionButtons = document.getElementById('actionButtons');
-        const copyBtn = document.getElementById('copyBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
+      // RTL support for Arabic
+      if (lang === 'ar') {
+        document.body.setAttribute('dir', 'rtl');
+        elements.mainTitle.style.textAlign = "right";
+        elements.mainSubtitle.style.textAlign = "right";
+        elements.inputPanel.style.textAlign = "right";
+      } else {
+        document.body.setAttribute('dir', 'ltr');
+        elements.mainTitle.style.textAlign = "left";
+        elements.mainSubtitle.style.textAlign = "left";
+        elements.inputPanel.style.textAlign = "left";
+      }
 
-        // File upload handling
-        uploadArea.addEventListener('click', () => imageInput.click());
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('bg-gray-100', 'dark:bg-gray-700');
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('bg-gray-100', 'dark:bg-gray-700');
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('bg-gray-100', 'dark:bg-gray-700');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFileSelection(files[0]);
-            }
-        });
+      // Button highlight
+      elements.enBtn.classList.toggle('active', lang === 'en');
+      elements.arBtn.classList.toggle('active', lang === 'ar');
+    }
 
-        imageInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFileSelection(e.target.files[0]);
-            }
-        });
+    elements.enBtn.addEventListener('click', () => setLanguage('en'));
+    elements.arBtn.addEventListener('click', () => setLanguage('ar'));
 
-        function handleFileSelection(file) {
-            if (!file.type.startsWith('image/')) {
-                showError('Please select a valid image file.');
-                return;
-            }
+    // Initial language
+    setLanguage('en');
 
-            selectedFile = file;
-            
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImg.src = e.target.result;
-                fileName.textContent = file.name;
-                uploadPrompt.classList.add('hidden');
-                imagePreview.classList.remove('hidden');
-                extractBtn.disabled = false;
-                hideError();
-            };
-            reader.readAsDataURL(file);
-        }
+    // Image input & preview
+    let selectedFile = null;
+    elements.imageInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        selectedFile = file;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          elements.preview.src = event.target.result;
+          elements.preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+        elements.extractBtn.disabled = false; // Will be enabled after file loaded
+        setTimeout(() => {
+          elements.extractBtn.disabled = false;
+        }, 300);
+        elements.output.textContent = '';
+      } else {
+        elements.preview.style.display = 'none';
+        elements.extractBtn.disabled = true;
+        elements.output.textContent = '';
+      }
+    });
 
-        // Extract text using Tesseract.js
-        extractBtn.addEventListener('click', async () => {
-            if (!selectedFile) return;
+    // Helper function to determine if a line is "clear"
+    function isClearText(line) {
+      line = line.trim();
+      if (line.length < 3) return false;
+      const letterCount = (line.match(/[\p{L}\p{N}]/gu) || []).length;
+      if (letterCount / line.length < 0.7) return false;
+      if ((line.match(/[?~¤■□◆◇]/g) || []).length > 3) return false;
+      return true;
+    }
 
-            setExtractButtonState(true);
-            hideError();
-            disableActionButtons();
-            showProgress();
+    // Extract text in English + All Arabic Calligraphy Scripts
+    elements.extractBtn.addEventListener('click', function() {
+      if (!selectedFile) return;
+      elements.output.innerHTML = `<span class="loading">${lang === 'ar' ? ar.loading : en.loading}</span>`;
+      // Tesseract supports these Arabic script language codes:
+      // 'ara' (Arabic), 'arq' (Algerian), 'arb' (Moroccan), 'ara' covers most, but let's include all variants for calligraphic styles
+      // 'syc' (Syriac), 'uigh' (Uighur Arabic), 'fa' (Persian), 'ur' (Urdu), 'pus' (Pashto), 'snd' (Sindhi), 'ota' (Ottoman), 'aze_cyrl' (Azeri), etc.
+      // We combine the most prominent ones. Tesseract will auto-detect script within the selected languages.
+      const langString = 'eng+ara+arq+arb+syc+uigh+fa+ur+pus+snd+ota+aze_cyrl';
 
-            try {
-                const result = await Tesseract.recognize(selectedFile, 'eng', {
-                    logger: m => {
-                        updateProgress(m);
-                    }
-                });
-
-                extractedTextContent = result.data.text.trim();
-                extractedText.value = extractedTextContent || "No text was found in the image.";
-                enableActionButtons();
-                hideProgress();
-                setExtractButtonState(false);
-                hideError();
-            } catch (err) {
-                showError("Failed to process image: " + err.message);
-                setExtractButtonState(false);
-                hideProgress();
-            }
-        });
-
-        function updateProgress(m) {
-            if (m.status === 'recognizing text') {
-                const progress = Math.round(m.progress * 100);
-                progressBar.style.width = progress + '%';
-                progressText.textContent = `Recognizing text... ${progress}%`;
-            } else {
-                progressText.textContent = m.status || 'Processing...';
-            }
-        }
-
-        function showProgress() {
-            progressContainer.classList.remove('hidden');
-            progressBar.style.width = '0%';
-            progressText.textContent = 'Initializing OCR...';
-        }
-
-        function hideProgress() {
-            progressContainer.classList.add('hidden');
-        }
-
-        // Copy text function
-        copyBtn.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(extractedTextContent);
-                const originalText = copyBtn.innerHTML;
-                copyBtn.innerHTML = `
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Copied!
-                `;
-                copyBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-                copyBtn.classList.add('bg-green-700');
-                setTimeout(() => {
-                    copyBtn.innerHTML = originalText;
-                    copyBtn.classList.add('bg-green-600', 'hover:bg-green-700');
-                    copyBtn.classList.remove('bg-green-700');
-                }, 2000);
-            } catch (err) {
-                showError('Failed to copy text to clipboard');
-            }
-        });
-
-        // Download text function
-        downloadBtn.addEventListener('click', () => {
-            const blob = new Blob([extractedTextContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'extracted-text.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-
-        // Clear all function
-        clearBtn.addEventListener('click', () => {
-            selectedFile = null;
-            imageInput.value = '';
-            uploadPrompt.classList.remove('hidden');
-            imagePreview.classList.add('hidden');
-            extractBtn.disabled = true;
-            extractedTextContent = '';
-            extractedText.value = '';
-            disableActionButtons();
-            hideProgress();
-            hideError();
-        });
-
-        function setExtractButtonState(isLoading) {
-            extractBtn.disabled = isLoading;
-            if (isLoading) {
-                extractBtnText.classList.add('hidden');
-                extractBtnLoader.classList.remove('hidden');
-            } else {
-                extractBtnText.classList.remove('hidden');
-                extractBtnLoader.classList.add('hidden');
-            }
-        }
-
-        function showError(message) {
-            errorText.textContent = message;
-            errorMessage.classList.remove('hidden');
-        }
-
-        function hideError() {
-            errorMessage.classList.add('hidden');
-        }
-
-        function enableActionButtons() {
-            actionButtons.classList.remove('opacity-50', 'pointer-events-none');
-        }
-
-        function disableActionButtons() {
-            actionButtons.classList.add('opacity-50', 'pointer-events-none');
-        }
-    </script>
+      Tesseract.recognize(
+        selectedFile,
+        langString,
+        { logger: m => {} }
+      ).then(({ data: { text } }) => {
+        let out = text
+          .split('\n')
+          .map(l => l.trim())
+          .filter(isClearText)
+          .join('\n');
+        elements.output.textContent = out.length ? out : (lang === 'ar' ? ar.noText : en.noText);
+      }).catch(() => {
+        elements.output.textContent = lang === 'ar' ? ar.error : en.error;
+      });
+    });
+  </script>
 </body>
 </html>
