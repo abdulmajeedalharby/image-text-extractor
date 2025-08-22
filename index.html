@@ -2,182 +2,199 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <title>Image Text Extractor | مستخرج النص من الصورة</title>
+  <title>Arabic & English Calligraphy OCR | مستخرج الخط العربي والإنجليزي</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts for Arabic and English -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700&family=El+Messiri:wght@700&family=Amiri&family=Scheherazade+New:wght@700&family=Tajawal:wght@700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
   <style>
     html, body {
-      height: 100%;
       margin: 0;
       padding: 0;
+      min-height: 100vh;
+      box-sizing: border-box;
     }
     body {
-      min-height: 100vh;
-      margin: 0;
-      font-family: 'Segoe UI', 'Cairo', Arial, sans-serif;
-      background: linear-gradient(120deg, #3a1c71 0%, #d76d77 50%, #ffaf7b 100%);
-      box-sizing: border-box;
+      background: linear-gradient(135deg, #202056 0%, #c850c0 100%);
+      font-family: 'Cairo', 'Amiri', 'Montserrat', Arial, sans-serif;
       color: #fff;
-      overflow-x: hidden;
-      transition: background 0.6s;
     }
-    header {
-      width: 100%;
-      background: rgba(34, 8, 64, 0.77);
-      padding: 0 0 12px 0;
-      text-align: center;
-      box-shadow: 0 2px 14px #1b06407e;
-      margin-bottom: 18px;
+    .hero {
+      width: 100vw;
+      min-height: 38vh;
+      background: linear-gradient(120deg, #1b1b3a 70%, #864ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      box-shadow: 0 4px 32px #3c005e29;
+      border-bottom-left-radius: 70px 30px;
+      border-bottom-right-radius: 70px 30px;
     }
-    .title {
-      font-size: 2.4rem;
-      font-weight: 700;
-      margin: 0;
-      padding-top: 26px;
-      background: linear-gradient(90deg, #ffe53b, #fa8bff 80%);
-      background-clip: text;
+    .hero h1 {
+      font-family: 'El Messiri', 'Cairo', sans-serif;
+      font-size: 2.9rem;
+      letter-spacing: 1.5px;
+      margin: 32px 0 6px 0;
+      color: #fffbe9;
+      background: linear-gradient(90deg, #ffe53b 30%, #fa8bff 90%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-fill-color: transparent;
-      letter-spacing: 1.5px;
+      background-clip: text;
     }
-    .subtitle {
-      font-size: 1.25rem;
-      margin: 7px 0 0 0;
+    .hero h2 {
+      font-family: 'Scheherazade New', 'Amiri', serif;
+      font-size: 1.5rem;
       color: #ffe1ea;
-      letter-spacing: 0.5px;
-      font-weight: 400;
+      margin-bottom: 12px;
+      font-weight: 700;
     }
-    .lang-switch {
-      direction: ltr;
-      margin: 18px 0 0 0;
-      text-align: center;
+    .switcher {
+      margin: 10px 0 0 0;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
     }
-    .lang-btn {
+    .switch-btn {
+      font-family: 'Cairo', 'Montserrat', sans-serif;
       background: #fff;
-      color: #410077;
+      color: #6d24a4;
       border: none;
       border-radius: 7px;
-      padding: 6px 16px;
-      margin: 0 7px;
-      font-weight: 600;
+      padding: 6px 18px;
+      font-weight: 700;
       font-size: 1rem;
       cursor: pointer;
       box-shadow: 0 2px 8px #41007723;
       transition: background .17s, color .17s;
     }
-    .lang-btn.active, .lang-btn:focus {
-      background: #8f37ff;
+    .switch-btn.active, .switch-btn:focus {
+      background: #fa8bff;
       color: #fff;
     }
-    main {
+    .container {
+      max-width: 960px;
+      margin: -60px auto 0 auto;
+      padding: 32px 0 54px 0;
       display: flex;
-      flex-direction: row;
-      align-items: flex-start;
+      gap: 40px;
       justify-content: center;
-      gap: 48px;
-      min-height: 65vh;
-      padding: 0 5vw 0 5vw;
-      margin-top: 22px;
+      align-items: flex-start;
       flex-wrap: wrap;
+      z-index: 5;
+      position: relative;
     }
-    .left-panel {
-      flex: 0 1 380px;
-      background: rgba(34, 8, 64, 0.82);
-      border-radius: 28px;
-      box-shadow: 0 8px 48px #1b064066;
-      padding: 32px 32px 24px 32px;
-      min-width: 300px;
-      max-width: 430px;
-      margin-bottom: 32px;
+    .panel {
+      background: rgba(255,255,255,0.11);
+      border-radius: 26px;
+      box-shadow: 0 12px 38px #3c005e1b;
+      padding: 30px 28px 24px 28px;
+      min-width: 320px;
+      max-width: 420px;
+      width: 100%;
+      margin-bottom: 30px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      position: relative;
     }
-    .right-panel {
-      flex: 1 1 380px;
-      background: rgba(255,255,255,0.13);
-      border-radius: 28px;
-      box-shadow: 0 8px 48px #1b064033;
-      padding: 32px 32px 24px 32px;
-      min-width: 300px;
-      max-width: 600px;
-      margin-bottom: 32px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
+    .panel label {
+      font-family: 'Tajawal', 'Cairo', Arial, sans-serif;
+      font-size: 1.15rem;
+      color: #fffbe9;
+      margin-bottom: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      text-align: center;
     }
-    label {
-      font-size: 1.05rem;
-      margin-bottom: 10px;
-      font-weight: 500;
-      color: #ffe1ea;
-      display: block;
-      text-shadow: 0 1px 4px #15122b;
-      letter-spacing: 0.3px;
-    }
-    input[type="file"] {
-      margin-bottom: 18px;
-      padding: 10px 0;
+    .panel input[type="file"] {
+      margin-bottom: 22px;
       color: #fff;
       background: none;
       border: none;
       cursor: pointer;
       width: 100%;
       direction: ltr;
+      font-size: 1rem;
     }
     #preview {
-      max-width: 98%;
-      max-height: 270px;
-      margin: 20px auto 10px auto;
-      box-shadow: 0 2px 16px #ffe53b36;
+      max-width: 100%;
+      max-height: 220px;
       border-radius: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 16px #ffe53b36;
       display: none;
-      border: 2px solid #7f5fff;
+      border: 2px solid #fa8bff;
       background: #fff;
     }
     .extract-btn {
-      background: linear-gradient(90deg, #8f37ff 0%, #fa8bff 100%);
+      font-family: 'Cairo', 'Montserrat', sans-serif;
+      background: linear-gradient(90deg, #ffb56b 0%, #fa8bff 100%);
       border: none;
       color: #fff;
-      padding: 12px 44px;
+      padding: 13px 42px;
       border-radius: 16px;
-      font-size: 1.12rem;
-      font-weight: 600;
+      font-size: 1.13rem;
+      font-weight: 700;
       cursor: pointer;
-      margin-top: 8px;
-      margin-bottom: 24px;
+      margin-top: 9px;
+      margin-bottom: 20px;
       transition: background 0.2s, transform 0.17s;
       box-shadow: 0 1px 8px #7f5fff33;
     }
     .extract-btn:disabled {
-      background: #2d1c41 !important;
-      color: #ba8bfc !important;
+      background: #6d24a4 !important;
+      color: #e5d7ff !important;
       cursor: not-allowed;
+    }
+    .panel .tips {
+      margin-top: 12px;
+      color: #fffbe9;
+      font-size: 1.03rem;
+      background: rgba(255, 255, 255, 0.09);
+      padding: 8px 13px;
+      border-radius: 12px;
+      text-align: center;
+      font-family: 'Tajawal', 'Cairo', Arial, sans-serif;
+    }
+    .output-panel {
+      background: rgba(255,255,255,0.09);
+      border-radius: 26px;
+      box-shadow: 0 12px 38px #3c005e1b;
+      padding: 30px 28px 24px 28px;
+      min-width: 320px;
+      max-width: 470px;
+      width: 100%;
+      margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .section-title {
       color: #ffb56b;
-      margin-bottom: 10px;
-      font-size: 1.13rem;
-      font-weight: 600;
+      font-family: 'El Messiri', 'Cairo', sans-serif;
+      margin-bottom: 9px;
+      font-size: 1.18rem;
+      font-weight: 700;
       letter-spacing: 0.3px;
       margin-top: 7px;
+      text-align: center;
     }
     #output {
-      background: linear-gradient(90deg, #2e1439 0%, #341e46 100%);
+      background: linear-gradient(90deg, #2e1439 0%, #864ba2 100%);
       color: #fff;
-      min-height: 82px;
+      min-height: 100px;
       padding: 16px 14px;
       border-radius: 15px;
       word-break: break-word;
       white-space: pre-wrap;
-      font-size: 1.07rem;
+      font-size: 1.09rem;
+      font-family: 'Cairo', 'Amiri', 'Scheherazade New', 'Montserrat', Arial, sans-serif;
       box-shadow: 0 2px 10px #7f5fff13;
       margin-bottom: 0;
       outline: 1.5px solid #7f5fff44;
       width: 100%;
-      max-width: 98%;
+      max-width: 100%;
+      direction: initial;
+      text-align: start;
     }
     .loading {
       color: #ffe53b;
@@ -185,37 +202,30 @@
       font-style: italic;
       letter-spacing: 1px;
     }
-    .tips {
-      margin-top: 20px;
-      color: #ffe1ea;
-      font-size: 0.98rem;
-      background: rgba(255, 255, 255, 0.09);
-      padding: 12px 14px;
-      border-radius: 12px;
-    }
     .footer {
       margin-top: 0;
       color: #f8e8ff;
-      font-size: 1.05rem;
+      font-size: 1.03rem;
       text-align: center;
       letter-spacing: 0.2px;
       background: rgba(34, 8, 64, 0.75);
-      padding: 24px 0 18px 0;
+      padding: 20px 0 13px 0;
       width: 100vw;
+      font-family: 'Cairo', 'Montserrat', Arial, sans-serif;
     }
     @media (max-width: 1100px) {
-      main {
+      .container {
         flex-direction: column;
         align-items: stretch;
         gap: 0;
         padding: 0 2vw 0 2vw;
       }
-      .left-panel, .right-panel {
+      .panel, .output-panel {
         margin: 0 auto 32px auto;
       }
     }
     @media (max-width: 700px) {
-      .left-panel, .right-panel {
+      .panel, .output-panel {
         min-width: 90vw;
         max-width: 98vw;
         padding: 18px 6vw 18px 6vw;
@@ -224,61 +234,60 @@
   </style>
 </head>
 <body>
-  <header>
-    <div class="title" id="main-title">✨ Image Text Extractor</div>
-    <div class="subtitle" id="main-subtitle">Extract text from your images easily | استخرج النص من صورك بسهولة</div>
-    <div class="lang-switch">
-      <button class="lang-btn active" id="en-btn">English</button>
-      <button class="lang-btn" id="ar-btn">العربية</button>
+  <section class="hero">
+    <h1 id="main-title">Arabic & English Calligraphy OCR</h1>
+    <h2 id="main-subtitle">Extract text from all Arabic calligraphic styles & English | استخراج جميع نصوص الخط العربي والإنجليزي</h2>
+    <div class="switcher">
+      <button class="switch-btn active" id="en-btn">English</button>
+      <button class="switch-btn" id="ar-btn">العربية</button>
     </div>
-  </header>
-  <main>
-    <section class="left-panel" id="input-panel">
-      <label for="imageInput" id="file-label">Select an image file:</label>
+  </section>
+  <section class="container">
+    <form class="panel" id="input-panel" onsubmit="event.preventDefault();">
+      <label for="imageInput" id="file-label">Select an image with Arabic or English calligraphy:</label>
       <input type="file" id="imageInput" accept="image/*">
       <img id="preview" alt="Image preview">
       <button class="extract-btn" id="extractBtn" disabled>Extract Text</button>
       <div class="tips" id="tips">
-        Supported formats: JPG, PNG, BMP, GIF<br>
-        For best results, use clear images with readable text.<br>
-        النصوص الصغيرة أو غير الواضحة قد تعطي نتائج أقل دقة.
+        Supported: JPG, PNG, BMP, GIF<br>
+        For best results, use clear images with readable calligraphy.<br>
+        <span style="font-family:'Amiri','Scheherazade New','El Messiri',Cairo,serif;">الخط العربي المدعوم: النسخ، الرقعة، الديواني، الثلث، الكوفي، المغربي، الفارسي وغيرها</span>
       </div>
-    </section>
-    <section class="right-panel">
+    </form>
+    <section class="output-panel">
       <div class="section-title" id="output-title">Extracted Text</div>
       <div id="output"></div>
     </section>
-  </main>
+  </section>
   <div class="footer">
-    <span id="footer-text">Made with 💜 | Image Text Extractor | مستخرج النص من الصورة</span>
+    <span id="footer-text">Made with 💜 | Arabic & English Calligraphy OCR | مستخرج الخط العربي</span>
   </div>
-  <!-- Tesseract.js with Arabic script support -->
   <script src="https://unpkg.com/tesseract.js@5.0.0/dist/tesseract.min.js"></script>
   <script>
     // Language handling
     const en = {
-      mainTitle: "✨ Image Text Extractor",
-      mainSubtitle: "Extract text from your images easily | استخرج النص من صورك بسهولة",
-      fileLabel: "Select an image file:",
+      mainTitle: "Arabic & English Calligraphy OCR",
+      mainSubtitle: "Extract text from all Arabic calligraphic styles & English | استخراج جميع نصوص الخط العربي والإنجليزي",
+      fileLabel: "Select an image with Arabic or English calligraphy:",
       extractBtn: "Extract Text",
       outputTitle: "Extracted Text",
-      tips: "Supported formats: JPG, PNG, BMP, GIF<br>For best results, use clear images with readable text.<br>النصوص الصغيرة أو غير الواضحة قد تعطي نتائج أقل دقة.",
-      loading: "Extracting text, please wait...",
-      noText: "[No text detected]",
+      tips: "Supported: JPG, PNG, BMP, GIF<br>For best results, use clear images with readable calligraphy.<br><span style=\"font-family:'Amiri','Scheherazade New','El Messiri',Cairo,serif;\">الخط العربي المدعوم: النسخ، الرقعة، الديواني، الثلث، الكوفي، المغربي، الفارسي وغيرها</span>",
+      loading: "Extracting text from all scripts, please wait...",
+      noText: "[No clear text detected]",
       error: "[Error extracting text]",
-      footer: "Made with 💜 | Image Text Extractor | مستخرج النص من الصورة"
+      footer: "Made with 💜 | Arabic & English Calligraphy OCR | مستخرج الخط العربي"
     };
     const ar = {
-      mainTitle: "✨ مستخرج النص من الصورة",
-      mainSubtitle: "استخرج النص من صورك بسهولة | Extract text from your images easily",
-      fileLabel: "اختر صورة من جهازك:",
+      mainTitle: "مستخرج الخط العربي والإنجليزي",
+      mainSubtitle: "استخراج جميع نصوص الخط العربي والإنجليزي | Extract text from all Arabic calligraphic styles & English",
+      fileLabel: "اختر صورة تحتوي على نص عربي أو إنجليزي:",
       extractBtn: "استخرج النص",
       outputTitle: "النص المستخرج",
-      tips: "الصيغ المدعومة: JPG, PNG, BMP, GIF<br>لأفضل نتيجة استخدم صورًا واضحة ذات نص مقروء.<br>النصوص الصغيرة أو غير الواضحة قد تعطي نتائج أقل دقة.",
-      loading: "جاري استخراج النص، يرجى الانتظار...",
-      noText: "[لم يتم العثور على نص]",
+      tips: "الصيغ المدعومة: JPG, PNG, BMP, GIF<br>لأفضل نتيجة استخدم صورًا واضحة بخط مقروء.<br><span style=\"font-family:'Amiri','Scheherazade New','El Messiri',Cairo,serif;\">الخط العربي المدعوم: النسخ، الرقعة، الديواني، الثلث، الكوفي، المغربي، الفارسي وغيرها</span>",
+      loading: "جاري استخراج النصوص من جميع الخطوط، يرجى الانتظار...",
+      noText: "[لم يتم العثور على نص واضح]",
       error: "[حدث خطأ أثناء استخراج النص]",
-      footer: "صُنع بحب 💜 | مستخرج النص من الصورة | Image Text Extractor"
+      footer: "صُنع بحب 💜 | مستخرج الخط العربي والإنجليزي | Arabic & English Calligraphy OCR"
     };
     let lang = 'en';
 
@@ -309,28 +318,28 @@
       elements.tips.innerHTML = dict.tips;
       elements.footer.textContent = dict.footer;
 
-      // RTL support for Arabic
       if (lang === 'ar') {
         document.body.setAttribute('dir', 'rtl');
         elements.mainTitle.style.textAlign = "right";
         elements.mainSubtitle.style.textAlign = "right";
         elements.inputPanel.style.textAlign = "right";
+        elements.output.style.textAlign = "right";
+        elements.output.style.direction = "rtl";
       } else {
         document.body.setAttribute('dir', 'ltr');
         elements.mainTitle.style.textAlign = "left";
         elements.mainSubtitle.style.textAlign = "left";
         elements.inputPanel.style.textAlign = "left";
+        elements.output.style.textAlign = "left";
+        elements.output.style.direction = "ltr";
       }
 
-      // Button highlight
       elements.enBtn.classList.toggle('active', lang === 'en');
       elements.arBtn.classList.toggle('active', lang === 'ar');
     }
 
     elements.enBtn.addEventListener('click', () => setLanguage('en'));
     elements.arBtn.addEventListener('click', () => setLanguage('ar'));
-
-    // Initial language
     setLanguage('en');
 
     // Image input & preview
@@ -345,10 +354,8 @@
           elements.preview.style.display = 'block';
         };
         reader.readAsDataURL(file);
-        elements.extractBtn.disabled = false; // Will be enabled after file loaded
-        setTimeout(() => {
-          elements.extractBtn.disabled = false;
-        }, 300);
+        elements.extractBtn.disabled = false;
+        setTimeout(() => { elements.extractBtn.disabled = false; }, 300);
         elements.output.textContent = '';
       } else {
         elements.preview.style.display = 'none';
@@ -357,24 +364,27 @@
       }
     });
 
-    // Helper function to determine if a line is "clear"
+    // Helper function: keep only clear text lines
     function isClearText(line) {
       line = line.trim();
       if (line.length < 3) return false;
+      // At least 70% is letter/digit
       const letterCount = (line.match(/[\p{L}\p{N}]/gu) || []).length;
       if (letterCount / line.length < 0.7) return false;
+      // Not too many noise chars
       if ((line.match(/[?~¤■□◆◇]/g) || []).length > 3) return false;
+      // Avoid lines that are mostly the same char
+      if (/^(.)\1+$/.test(line)) return false;
       return true;
     }
 
-    // Extract text in English + All Arabic Calligraphy Scripts
+    // Extract text in English + all Arabic calligraphy scripts
     elements.extractBtn.addEventListener('click', function() {
       if (!selectedFile) return;
       elements.output.innerHTML = `<span class="loading">${lang === 'ar' ? ar.loading : en.loading}</span>`;
-      // Tesseract supports these Arabic script language codes:
-      // 'ara' (Arabic), 'arq' (Algerian), 'arb' (Moroccan), 'ara' covers most, but let's include all variants for calligraphic styles
-      // 'syc' (Syriac), 'uigh' (Uighur Arabic), 'fa' (Persian), 'ur' (Urdu), 'pus' (Pashto), 'snd' (Sindhi), 'ota' (Ottoman), 'aze_cyrl' (Azeri), etc.
-      // We combine the most prominent ones. Tesseract will auto-detect script within the selected languages.
+      // Tesseract.js will attempt to load all major Arabic calligraphy script models supported
+      // eng: English, ara: Arabic, arq: Algerian, arb: Moroccan, syc: Syriac, uigh: Uighur Arabic, fa: Persian, ur: Urdu, pus: Pashto, snd: Sindhi, ota: Ottoman, aze_cyrl: Azeri
+      // These cover nearly all historical and regional Arabic calligraphic scripts
       const langString = 'eng+ara+arq+arb+syc+uigh+fa+ur+pus+snd+ota+aze_cyrl';
 
       Tesseract.recognize(
